@@ -1,132 +1,43 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>My Interactive Index</title>
-    
+    <title>Task Manager Pro</title>
     <style>
-        :root {
-            --primary: #6c5ce7;
-            --bg: #f8f9fa;
-            --text: #2d3436;
-            --card-bg: #ffffff;
-        }
-
-        body.dark-mode {
-            --bg: #1e272e;
-            --text: #d2dae2;
-            --card-bg: #2f3542;
-        }
-
-        body {
-            background-color: var(--bg);
-            color: var(--text);
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            margin: 0;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            min-height: 100vh;
-            transition: background 0.3s ease;
-        }
-
-        header {
-            width: 100%;
-            padding: 1rem 2rem;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            box-sizing: border-box;
-        }
-
-        .container {
-            max-width: 800px;
-            text-align: center;
-            margin-top: 50px;
-            padding: 2rem;
-            background: var(--card-bg);
-            border-radius: 15px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
-        }
-
-        button {
-            background: var(--primary);
-            color: white;
-            border: none;
-            padding: 12px 24px;
-            border-radius: 8px;
-            font-size: 1rem;
-            cursor: pointer;
-            transition: transform 0.2s;
-            margin: 10px;
-        }
-
-        button:hover {
-            transform: translateY(-2px);
-            opacity: 0.9;
-        }
-
-        #mode-toggle {
-            background: transparent;
-            border: 2px solid var(--primary);
-            color: var(--primary);
-        }
+        body { font-family: 'Segoe UI', sans-serif; background: #f4f7f6; padding: 20px; }
+        .container { max-width: 400px; margin: auto; background: white; padding: 20px; border-radius: 10px; box-shadow: 0 5px 15px rgba(0,0,0,0.1); }
+        input { width: 80%; padding: 10px; border: 1px solid #ddd; border-radius: 5px; }
+        button { padding: 10px; background: #28a745; color: white; border: none; cursor: pointer; }
+        ul { list-style: none; padding: 0; }
+        li { padding: 10px; border-bottom: 1px solid #eee; display: flex; justify-content: space-between; }
     </style>
 </head>
 <body>
-
-    <header>
-        <div style="font-weight: bold; font-size: 1.5rem;">JS.Index</div>
-        <button id="mode-toggle">Toggle Dark Mode</button>
-    </header>
-
     <div class="container">
-        <h1 id="main-title">Hello, World!</h1>
-        <p>This page uses JavaScript to handle theme switching and dynamic content updates.</p>
-        
-        <div id="stats-area">
-            <p>Button clicks: <span id="click-count">0</span></p>
-        </div>
-
-        <button onclick="incrementCounter()">Click Me!</button>
-        <button onclick="resetPage()">Reset</button>
+        <h2>✅ Task Manager</h2>
+        <input type="text" id="taskInput" placeholder="New task...">
+        <button onclick="addTask()">Add</button>
+        <ul id="taskList"></ul>
     </div>
 
     <script>
-        // State variables
-        let count = 0;
-
-        // Select elements
-        const modeBtn = document.getElementById('mode-toggle');
-        const title = document.getElementById('main-title');
-        const countDisplay = document.getElementById('click-count');
-
-        // Feature 1: Dark Mode Toggle
-        modeBtn.addEventListener('click', () => {
-            document.body.classList.toggle('dark-mode');
-            const isDark = document.body.classList.contains('dark-mode');
-            modeBtn.textContent = isDark ? "Switch to Light" : "Switch to Dark";
-        });
-
-        // Feature 2: Counter Logic
-        function incrementCounter() {
-            count++;
-            countDisplay.textContent = count;
-            
-            if (count === 10) {
-                title.textContent = "You're a clicking pro! 🏆";
-                title.style.color = "#00b894";
-            }
+        async function loadTasks() {
+            const res = await fetch('/api/tasks');
+            const data = await res.json();
+            const list = document.getElementById('taskList');
+            list.innerHTML = data.map(t => `<li>${t.title} <span>${t.completed ? '✔️' : '⏳'}</span></li>`).join('');
         }
 
-        // Feature 3: Reset Logic
-        function resetPage() {
-            count = 0;
-            countDisplay.textContent = count;
-            title.textContent = "Hello, World!";
-            title.style.color = "inherit";
+        async function addTask() {
+            const title = document.getElementById('taskInput').value;
+            await fetch('/api/tasks', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ title })
+            });
+            document.getElementById('taskInput').value = '';
+            loadTasks();
         }
+        loadTasks();
     </script>
 </body>
-</html>
+</html>:
